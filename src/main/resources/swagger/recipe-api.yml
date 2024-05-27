@@ -1,0 +1,250 @@
+openapi: 3.0.3
+info:
+  title: Recipe Management Application
+  description: Recipe Management Application
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8085/swagger-ui.html'
+paths:
+  /api/v1/recipes: # <--- This is the path for the Recipe API
+    get:
+      tags:
+        - recipe
+      summary: Get all recipes
+      operationId: getAllRecipes
+      responses:
+        '200':
+          description: Recipes retrieved successfully 
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipeResponse'
+        '400':
+          description: Bad request
+    post:
+      tags:
+        - recipe
+      summary: Add a new recipe
+      operationId: addRecipe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/RecipeRequest'
+      responses:
+        '201':
+          description: Recipe created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeResponse'
+        '400':
+          description: Bad request 
+    put:
+      tags:
+        - recipe
+      summary: Update an existing recipe
+      operationId: updateRecipe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/RecipeRequest'
+      responses:
+        '200':
+          description: Recipe updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecipeResponse'
+        '400':
+          description: Invalid Recipe ID 
+        '404':
+          description: Recipe not found
+  /api/v1/recipes/{recipeId}: # <--- This is the path for the Recipe API
+    get:
+      tags:
+        - recipe
+      summary: Get recipe by ID
+      operationId: getRecipeById
+      parameters:
+        - name: recipeId
+          in: path
+          required: true
+          description: ID of the recipe to return
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recipe retrieved successfully 
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/RecipeResponse'
+        '400':
+          description: Invalid Recipe ID 
+        '404':
+          description: Recipe not found
+    delete:
+      tags:
+        - recipe
+      summary: Delete recipe by ID
+      operationId: deleteRecipeById
+      parameters:
+        - name: recipeId
+          in: path
+          required: true
+          description: ID of the recipe to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recipe deleted
+        '400':
+          description: Invalid Recipe ID 
+        '404':
+          description: Recipe not found
+   
+  /api/v1/recipes/search:
+    post: # <--- This is the path for the Recipe API
+      tags:
+        - recipe
+      summary: Search recipes
+      operationId: searchRecipes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/RecipeSearchRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipeResponse'
+        '400':
+          description: Bad Request
+
+components:
+  schemas:
+    RecipeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        numberOfServings:
+          type: integer
+          format: int32
+        createdDate:
+          type: date-time
+          format: string
+        updatedDate:
+          type: date-time
+          format: string
+          pattern: yyyy-MM-dd HH:mm:ss
+        instructions:
+          type: string
+        ingredients:
+            type: array
+            items:
+                $ref: '#/components/schemas/IngredientResponse'
+    RecipeRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 50
+        type:
+          type: string
+          $ref: '#/components/schemas/RecipeType'
+        numberOfServings:
+          type: integer
+          format: int32
+        instructions:
+          type: string
+          pattern: ^[a-zA-Z0-9\s\.,-]*$
+          maxLength: 200
+        ingredients:
+            type: array
+            items:
+               $ref: '#/components/schemas/IngredientRequest'
+      required: [name, type, numberOfServings]
+    IngredientResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        createdDate:
+          type: date-time
+          format: string
+        updatedDate:
+          type: date-time
+          format: string
+          pattern: yyyy-MM-dd HH:mm:ss
+    IngredientRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          maxLength: 200
+    RecipeType:
+      type: string
+      enum:
+        - VEGETARIAN
+        - NON_VEGETARIAN
+        - VEGAN
+        - SNACK
+    SearchCriteria:
+      type: object
+      properties:
+        filterKey:
+          type: string
+          enum:
+            - NAME
+            - TYPE
+            - NUMBER_OF_SERVINGS
+            - INGREDIENTS
+            - INSTRUCTIONS
+        value:
+          type: string
+        operation:
+          type: string
+          enum:
+            - EQUALS
+            - CONTAINS
+            - NOT_CONTAINS
+            - NOT_EQUALS       
+    RecipeSearchRequest:
+      type: object
+      properties:
+        criteria:
+          type: list
+          items:
+            $ref: '#/components/schemas/SearchCriteria'
+        
