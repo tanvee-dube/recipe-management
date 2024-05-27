@@ -68,7 +68,7 @@ http://localhost:8085/openapi/swagger-ui/index.html
 
 ## Technologies
 
-Java 17, Spring Boot 3.2, Spring Data JPA, H2 Database, OpenAPI, Swagger-UI, Maven, Docker,JUnit, Mockito
+Java 17, Spring Boot 3.2, Spring Data JPA, H2 Database, OpenAPI, Swagger-UI, Maven, Docker,JUnit and Mockito
 
 
 -----------------------------------------
